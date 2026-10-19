@@ -1,0 +1,23 @@
+const {test}=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const os=require('node:os');
+const path=require('node:path');
+const cp=require('node:child_process');
+const root=path.resolve(__dirname,'../..');
+test('updater fetches source changes and leaves an uncommitted merge for review',t=>{
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'paperthin-update-'));t.after(()=>fs.rmSync(temp,{recursive:true,force:true}));
+ const upstream=path.join(temp,'upstream');const fork=path.join(temp,'fork');fs.mkdirSync(upstream);
+ const git=(cwd,...args)=>cp.execFileSync('git',args,{cwd,encoding:'utf8',stdio:'pipe'}).trim();
+ const identity=cwd=>{git(cwd,'config','user.name','Fixture');git(cwd,'config','user.email','fixture@example.invalid');git(cwd,'config','commit.gpgsign','false');};
+ git(upstream,'init','-b','main');identity(upstream);fs.writeFileSync(path.join(upstream,'source.md'),'old source\n');git(upstream,'add','.');git(upstream,'commit','-m','Initial source');
+ const old=git(upstream,'rev-parse','HEAD');git(temp,'clone',upstream,fork);identity(fork);
+ fs.mkdirSync(path.join(fork,'codex/scripts'),{recursive:true});fs.copyFileSync(path.join(root,'codex/scripts/update.cjs'),path.join(fork,'codex/scripts/update.cjs'));
+ fs.writeFileSync(path.join(fork,'codex/upstream.json'),JSON.stringify({repository:upstream,branch:'main',commit:old}));
+ git(fork,'add','.');git(fork,'commit','-m','Add fork packaging');const head=git(fork,'rev-parse','HEAD');
+ fs.writeFileSync(path.join(upstream,'source.md'),'new source\n');git(upstream,'add','.');git(upstream,'commit','-m','Update source');const latest=git(upstream,'rev-parse','HEAD');
+ const run=()=>cp.execFileSync(process.execPath,['codex/scripts/update.cjs'],{cwd:fork,encoding:'utf8',stdio:'pipe'});
+ fs.writeFileSync(path.join(fork,'uncommitted.txt'),'user work');assert.throws(run,/preserve local changes/);fs.unlinkSync(path.join(fork,'uncommitted.txt'));
+ const output=run();assert(output.includes(`--upstream-commit ${latest}`));assert.equal(git(fork,'rev-parse','HEAD'),head);assert.equal(git(fork,'rev-parse','MERGE_HEAD'),latest);assert.equal(fs.readFileSync(path.join(fork,'source.md'),'utf8'),'new source\n');
+ git(fork,'merge','--abort');assert.equal(fs.readFileSync(path.join(fork,'source.md'),'utf8'),'old source\n');
+});

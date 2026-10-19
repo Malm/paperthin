@@ -1,3 +1,11 @@
+# Malm’s Codex packaging layer
+
+For this fork’s single-skill package, first read [codex/AGENTS.md](codex/AGENTS.md) and [codex/README.md](codex/README.md). An instruction to update underlying skills includes regenerating the parent skill’s descriptions, catalog, invocation rules, and references, and running the packaging checks.
+
+The upstream authoring conventions below govern original workflows. The user-requested packaging layer under `codex/` deliberately uses one entrypoint and generated references instead. Packaging-only changes do not modify upstream catalogs, translations, package versions, or invoke npm release publishing. Preserve the original source workflows verbatim and merge upstream changes through the documented update process.
+
+---
+
 # Paperthin
 
 Paperthin is an agent-agnostic suite of plain-Markdown skills that keep an artifact **clean and true** — hygiene reflexes an agent reaches for on its own. This is the guide for authoring them — and itself a skill artifact, so `re0` it when it drifts. Every skill named below is defined in the shipped catalog, the [README](./README.md).

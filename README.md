@@ -1,3 +1,17 @@
+# Malm’s Paperthin family for Codex
+
+This fork packages Paperthin as **one Codex skill with progressively loaded workflows**. The parent skill, descriptions, invocation rules, and references are generated from the original sources.
+
+**[Installation, usage, and updates → codex/README.md](codex/README.md)**
+
+**[Instructions for agents maintaining this fork → codex/AGENTS.md](codex/AGENTS.md)**
+
+Install this distribution with `python3 codex/scripts/install.py` from a clone of **Malm/paperthin**. Do not use the upstream multi-skill installation command below for this layout. Original workflows and license notices remain unchanged. Updates are fetched and reviewed on request, not applied in the background.
+
+---
+
+## Original upstream README
+
 <div align="center">
 
 # Paperthin: Low-level agentic design patterns
